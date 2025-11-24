@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.casedigest'
 version = '0.0.1-SNAPSHOT'
-description = 'CaseDigest'
+description = 'AI-powered legal document summarizer'
 
 java {
 	toolchain {
@@ -20,6 +20,10 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.apache.pdfbox:pdfbox:3.0.6'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

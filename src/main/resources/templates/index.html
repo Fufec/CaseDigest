@@ -1,10 +1,415 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">CaseDigest</title>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --surface-color: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --error-color: #dc2626;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        [v-cloak] { display: none; }
+
+        #app { display: flex; width: 100%; height: 100%; }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: 320px;
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+        }
+        .sidebar-header {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .sidebar-header:hover { opacity: 0.8; }
+
+        .history-placeholder {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-style: italic;
+            margin-top: auto;
+            margin-bottom: auto;
+            text-align: center;
+        }
+
+        /* --- MAIN AREA --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        /* --- COMMON CARD STYLES --- */
+        .card {
+            background: var(--surface-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 1400px;
+            height: 100%;
+            max-height: 900px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Upload specific styles */
+        .upload-view { text-align: center; }
+
+        h2 {
+            margin-bottom: 12px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* --- DROP ZONE --- */
+        .drop-zone {
+            flex-grow: 1;
+            border: 4px dashed #cbd5e1;
+            border-radius: var(--radius);
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+        }
+        .drop-zone:hover { border-color: var(--primary-color); background-color: #eff6ff; }
+        .drop-zone.highlight { border-color: var(--primary-color); background-color: #dbeafe; transform: scale(0.995); }
+
+        .icon-cloud {
+            width: 120px; height: 120px;
+            fill: none; stroke: var(--primary-color); stroke-width: 1.2;
+            stroke-linecap: round; stroke-linejoin: round;
+        }
+        .drop-text { font-size: 1.4rem; color: var(--text-secondary); max-width: 400px; line-height: 1.5; }
+        .drop-text strong { color: var(--primary-color); font-weight: 700; display: block; font-size: 1.6rem; margin-bottom: 8px; }
+
+        /* --- FILE SELECTED STATE --- */
+        .file-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #eff6ff;
+            border: 2px solid #bfdbfe;
+            border-radius: var(--radius);
+            gap: 24px;
+        }
+        .file-icon { width: 80px; height: 80px; stroke: var(--primary-color); }
+        .file-name { font-weight: 700; font-size: 1.5rem; color: var(--text-primary); margin-bottom: 8px; }
+        .file-size { font-size: 1.1rem; color: var(--text-secondary); }
+
+        .remove-file-btn {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 10px 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s; margin-top: 10px;
+        }
+        .remove-file-btn:hover { color: var(--error-color); border-color: var(--error-color); background-color: #fef2f2; }
+
+        /* --- RESULT VIEW SPECIFICS --- */
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .result-header h2 { margin: 0; font-size: 1.8rem; }
+        .document-badge {
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f8fafc; /* Jemně šedé pozadí pro text */
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #334155;
+            white-space: pre-wrap; /* Zachová odstavce a řádkování */
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- ERROR & BUTTONS --- */
+        .error-message {
+            color: var(--error-color);
+            font-size: 1.1rem; font-weight: 700;
+            margin-top: 20px; margin-bottom: 10px;
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white; border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem; font-weight: 600;
+            border-radius: 10px; cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%; margin-top: 20px;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-primary:disabled { background-color: #94a3b8; cursor: not-allowed; }
+    </style>
 </head>
 <body>
-    <h1>Hello World!</h1>
+
+<div id="app" v-cloak>
+
+    <!-- SIDEBAR -->
+    <aside>
+        <!-- Logo s klikací událostí pro návrat -->
+        <div class="sidebar-header" @click="resetApp" title="Zpět na hlavní stránku">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span th:text="${appName}">App Name</span>
+        </div>
+
+        <div class="history-placeholder">
+            Historie chatů bude zde...
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+
+        <!-- 1. UPLOAD VIEW -->
+        <div v-if="currentView === 'upload'" class="card upload-view">
+            <h2>Analýza Dokumentu</h2>
+            <p class="subtitle">Získejte srozumitelné shrnutí dokumentu během několika vteřin.</p>
+
+            <!-- A) Drop Zone -->
+            <div v-if="!selectedFile"
+                 class="drop-zone"
+                 :class="{ highlight: isDragging }"
+                 @click="triggerFileInput"
+                 @dragenter.prevent="isDragging = true"
+                 @dragover.prevent="isDragging = true"
+                 @dragleave.prevent="isDragging = false"
+                 @drop.prevent="handleDrop">
+
+                <svg class="icon-cloud" viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div class="drop-text">
+                    <strong>Klikněte pro výběr</strong>
+                    nebo přetáhněte soubor sem
+                </div>
+            </div>
+
+            <!-- B) Selected File Info -->
+            <div v-else class="file-info">
+                <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M12 18v-6"></path>
+                    <path d="M9 15l3-3 3 3"></path>
+                </svg>
+                <div class="file-details">
+                    <div class="file-name">{{ selectedFile.name }}</div>
+                    <div class="file-size">{{ formatSize(selectedFile.size) }}</div>
+                </div>
+                <button class="remove-file-btn" @click="clearFile">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Zrušit výběr
+                </button>
+            </div>
+
+            <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+            <button class="btn-primary" :disabled="!selectedFile || isLoading" @click="uploadFile">
+                {{ isLoading ? 'Analyzuji...' : 'Analyzovat PDF' }}
+            </button>
+
+            <input type="file" ref="fileInput" accept="application/pdf" style="display: none" @change="handleFileSelect">
+        </div>
+
+        <!-- 2. RESULT VIEW -->
+        <div v-if="currentView === 'result'" class="card">
+            <div class="result-header">
+                <h2>Výsledek analýzy</h2>
+                <div class="document-badge" v-if="resultData">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    {{ resultData.fileName }}
+                </div>
+            </div>
+
+            <!-- Tady se vypisuje text -->
+            <div class="result-content" v-if="resultData">
+                {{ resultData.summary }}
+            </div>
+
+            <!-- Tlačítko "Nahrát další" -->
+            <button class="btn-primary" @click="resetApp">
+                Nahrát další dokument
+            </button>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                currentView: 'upload', // 'upload' | 'result'
+                selectedFile: null,
+                isDragging: false,
+                errorMessage: '',
+                isLoading: false,
+                resultData: null
+            }
+        },
+        methods: {
+            triggerFileInput() {
+                this.$refs.fileInput.click();
+            },
+            formatSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            },
+            validateFile(file) {
+                if (!file) return false;
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    this.errorMessage = '⛔ Vybraný soubor není PDF.';
+                    return false;
+                }
+                this.errorMessage = '';
+                return true;
+            },
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file && this.validateFile(file)) {
+                    this.selectedFile = file;
+                }
+            },
+            handleDrop(event) {
+                this.isDragging = false;
+                const file = event.dataTransfer.files[0];
+                if (file && this.validateFile(file)) {
+                    this.selectedFile = file;
+                }
+            },
+            clearFile() {
+                this.selectedFile = null;
+                this.errorMessage = '';
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+            },
+            async uploadFile() {
+                if (!this.selectedFile) return;
+                this.isLoading = true;
+                const formData = new FormData();
+                formData.append('file', this.selectedFile);
+
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || 'Chyba při nahrávání');
+                    }
+                    this.resultData = await response.json();
+                    this.currentView = 'result';
+                } catch (error) {
+                    this.errorMessage = 'Chyba: ' + error.message;
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            resetApp() {
+                // Resetuje stav pro nahrání nového souboru
+                this.clearFile();
+                this.resultData = null;
+                this.currentView = 'upload';
+            }
+        }
+    }).mount('#app');
+</script>
+
 </body>
 </html>
