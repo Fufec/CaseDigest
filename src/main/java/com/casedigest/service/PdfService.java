@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class PdfService {
-    // todo: nahradit DB
+    // todo: use a real DB
     private final AtomicLong idCounter = new AtomicLong(1);
 
     public CaseSummary processPdf(MultipartFile file) throws IOException {
@@ -23,50 +23,45 @@ public class PdfService {
         }
 
         String fullText = extractTextFromPdf(file);
-        String summary = generateSimpleSummary(fullText);
+        String summaryText = generateSimpleSummary(fullText);
 
         return new CaseSummary(
                 idCounter.getAndIncrement(),
                 file.getOriginalFilename(),
-                summary,
+                summaryText,
                 LocalDateTime.now()
         );
     }
 
-    /*
-        Zkontrolujeme, zda se opravdu jedna o PDF. To se dela pomoci tzv. Magic bytes
-     */
     private boolean isPdf(MultipartFile file) {
         try (InputStream inputStream = file.getInputStream()) {
             byte[] header = new byte[4];
             int bytesRead = inputStream.read(header);
 
-            // Pokud je soubor kratsi nez 4 byty, nejedna se o PDF
+            // If the file is smaller than 4 bytes, it's not a PDF
             if (bytesRead < 4) {
                 return false;
             }
 
-            // Validni PDF musi na zacatku obsahovat 4 byty obsahujici %PDF
-            return  header[0] == 0x25 && // %
-                    header[1] == 0x50 && // P
-                    header[2] == 0x44 && // D
-                    header[3] == 0x46;   // F
+            // A valid PDF must contain %PDF as its first 4 bytes
+            return header[0] == 0x25 && // %
+                   header[1] == 0x50 && // P
+                   header[2] == 0x44 && // D
+                   header[3] == 0x46;   // F
 
         } catch (IOException e) {
-            // Nepovedlo se precist soubor
             return false;
         }
     }
 
     private String extractTextFromPdf(MultipartFile file) throws IOException {
-        // dokument se po cteni automaticky zavre
         try (PDDocument document = Loader.loadPDF(file.getBytes())) {
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document);
         }
     }
 
-    // todo: ai prompt
+    // todo: use AI instead
     private String generateSimpleSummary(String text) {
         if (text == null || text.isBlank()) {
             return "Dokument neobsahuje žádný text.";

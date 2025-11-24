@@ -30,10 +30,12 @@ public class PdfController {
             return ResponseEntity.ok(summary);
 
         } catch (IllegalArgumentException e) {
+
             // the magic bytes don't correspond - return HTTP 400
             return ResponseEntity.badRequest().body(e.getMessage());
 
         } catch (IOException e) {
+
             // error during reading the file - return HTTP 500
             return ResponseEntity.internalServerError().body("Error during processing file: " + e.getMessage());
         }

@@ -2,17 +2,20 @@ package com.casedigest.model;
 
 import java.time.LocalDateTime;
 
+/**
+ * An object representing a summary of a PDF case.
+ */
 public class CaseSummary {
 
     private Long id;
     private String fileName;
-    private String summary;
+    private String contentSummary;
     private LocalDateTime created;
 
-    public CaseSummary(Long id, String fileName, String summary, LocalDateTime created) {
+    public CaseSummary(Long id, String fileName, String contentSummary, LocalDateTime created) {
         this.id = id;
         this.fileName = fileName;
-        this.summary = summary;
+        this.contentSummary = contentSummary;
         this.created = created;
     }
 
@@ -24,8 +27,8 @@ public class CaseSummary {
         return fileName;
     }
 
-    public String getSummary() {
-        return summary;
+    public String getContentSummary() {
+        return contentSummary;
     }
 
     public LocalDateTime getCreated() {
