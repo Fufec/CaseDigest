@@ -13,4 +13,4 @@ A simple app used to summarize law cases!
 
 > **NOTE:** The PDFs must contain a text layer, otherwise the app won't be able to extract the text! (It does not support OCR).
 
-- Each summary is stored in an SQLite database and can be later accessed via the history panel.
+- Each summary is stored in an SQLite database and can be later accessed via the history panel
