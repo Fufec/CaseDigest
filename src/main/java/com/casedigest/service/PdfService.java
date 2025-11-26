@@ -86,7 +86,7 @@ public class PdfService {
                 Požadavky na výstup:
                 1. Urči TYP DOKUMENTU (např. Smlouva, Rozsudek, Žaloba).
                 2. Vypiš HLAVNÍ BODY v odrážkách.
-                3. Pokud text obsahuje smluvní strany, data nebo částky, vypiš je.
+                3. Pokud text obsahuje subjekty, data nebo částky, vypiš je.
                 4. Piš česky a formátovaně.
                 
                 Text k analýze:
