@@ -15,7 +15,7 @@ import java.util.List;
 public class PdfController {
 
     private final CaseProcessingService caseProcessingService;
-    private final CaseSummaryRepository repository; // Přidáme repository
+    private final CaseSummaryRepository repository;
 
     public PdfController(CaseProcessingService caseProcessingService, CaseSummaryRepository repository) {
         this.caseProcessingService = caseProcessingService;
