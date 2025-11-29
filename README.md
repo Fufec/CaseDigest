@@ -43,7 +43,7 @@ $env:GEMINI_API_KEY='your-api-key-here'
 OR
 
 ```bash
-java -jar casedigest-0.0.1-SNAPSHOT.jar
+java -jar casedigest-1.0.0.jar
 ```
 
 The application will start on port 8080.
