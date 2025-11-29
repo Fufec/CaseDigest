@@ -12,7 +12,7 @@ CaseDigest is a Spring Boot application designed to summarize legal documents (P
 - Google Gemini API key
 
 ## Running the app locally
-There is a jar file available in the releases section. If you prefer building the app from scratch, follow these steps:
+There is a jar file available in the releases section. You will still need to put your API key in to the environment variable (see bellow). If you prefer building the app from scratch, you can use Gradle.
 
 ### 1. Configuring the environment
 > **The app uses Google Gemini to summarize the text from PDFs. To run the app locally, you'll need to set an environment variable called `GEMINI_API_KEY`:**
@@ -21,6 +21,7 @@ There is a jar file available in the releases section. If you prefer building th
 ```bash
 export GEMINI_API_KEY='your-api-key-here'
 ```
+
 **Windows:**
 ```powershell
 $env:GEMINI_API_KEY='your-api-key-here'
@@ -29,6 +30,11 @@ $env:GEMINI_API_KEY='your-api-key-here'
 ### 2. Launching the app
 ```bash
 ./gradlew bootRun
+```
+
+OR
+```bash
+java -jar casedigest-0.0.1-SNAPSHOT.jar
 ```
 
 The application will start on port 8080.
