@@ -1,6 +1,7 @@
 package com.casedigest.service;
 
 import com.casedigest.model.CaseSummary;
+import com.casedigest.repository.CaseSummaryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,26 +11,26 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class CaseProcessingService {
-    // todo: use a real DB
-    private final AtomicLong idCounter = new AtomicLong(1);
-
     private final PdfExtractionService extractionService;
     private final AiSummaryService aiSummaryService;
+    private final CaseSummaryRepository repository;
 
-    public CaseProcessingService(PdfExtractionService extractionService, AiSummaryService aiSummaryService) {
+    public CaseProcessingService(PdfExtractionService extractionService, AiSummaryService aiSummaryService, CaseSummaryRepository repository) {
         this.extractionService = extractionService;
         this.aiSummaryService = aiSummaryService;
+        this.repository = repository;
     }
 
     public CaseSummary processCase(MultipartFile file) throws IOException {
         String fullText = extractionService.extractText(file);
         String summaryText = aiSummaryService.summarize(fullText);
 
-        return new CaseSummary(
-                idCounter.getAndIncrement(),
+        CaseSummary summary = new CaseSummary(
                 file.getOriginalFilename(),
                 summaryText,
                 LocalDateTime.now()
         );
+
+        return repository.save(summary);
     }
 }

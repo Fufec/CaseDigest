@@ -1,23 +1,33 @@
 package com.casedigest.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
  * An object representing a summary of a PDF case.
  */
-
+@Entity
+@Table(name = "case_summaries")
 public class CaseSummary {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String fileName;
-    private String contentSummary;
-    private LocalDateTime created;
 
-    public CaseSummary(Long id, String fileName, String contentSummary, LocalDateTime created) {
-        this.id = id;
+    private String fileName;
+
+    @Lob
+    private String contentSummary;
+
+    private LocalDateTime createdAt;
+
+    public CaseSummary() {
+    }
+
+    public CaseSummary(String fileName, String contentSummary, LocalDateTime createdAt) {
         this.fileName = fileName;
         this.contentSummary = contentSummary;
-        this.created = created;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -32,7 +42,7 @@ public class CaseSummary {
         return contentSummary;
     }
 
-    public LocalDateTime getCreated() {
-        return created;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

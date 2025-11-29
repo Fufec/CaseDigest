@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class AiSummaryService {
     private final ChatClient chatClient;
 
-    // Load the prompt template from application.properties
+    // Load the prompt template from application.yml
     @Value("${app.ai.prompt-template}")
     private String promptTemplate;
 

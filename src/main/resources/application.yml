@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: CaseDigest
+
+  datasource:
+    url: jdbc:sqlite:casedigest.db
+    driver-class-name: org.sqlite.JDBC
+
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # upload file size limit
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  # # google gemini key
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+
+# prompt template
+app:
+  ai:
+    prompt-template: |
+      Proveď shrnutí následujícího právního textu.
+
+      Požadavky na výstup:
+      1. Urči TYP DOKUMENTU (např. Smlouva, Rozsudek, Žaloba).
+      2. Vypiš HLAVNÍ BODY v odrážkách.
+      3. Pokud text obsahuje subjekty, data nebo částky, vypiš je.
+      4. Piš česky a formátovaně.
+
+      Text k analýze:
+      %s
