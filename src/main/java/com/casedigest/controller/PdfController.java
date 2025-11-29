@@ -1,7 +1,7 @@
 package com.casedigest.controller;
 
 import com.casedigest.model.CaseSummary;
-import com.casedigest.service.PdfService;
+import com.casedigest.service.CaseProcessingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,29 +15,16 @@ import java.io.IOException;
 @RequestMapping("/api")
 public class PdfController {
 
-    private final PdfService pdfService;
+    private final CaseProcessingService caseProcessingService;
 
-    public PdfController(PdfService pdfService) {
-        this.pdfService = pdfService;
+    public PdfController(CaseProcessingService caseProcessingService) {
+        this.caseProcessingService = caseProcessingService;
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadPdf(@RequestParam("file") MultipartFile file) {
-        try {
-            CaseSummary summary = pdfService.processPdf(file);
-
-            // return HTTP 200 OK
+    public ResponseEntity<?> uploadPdf(@RequestParam("file") MultipartFile file) throws IOException {
+            // error is handled by GlobalExceptionHandler
+            CaseSummary summary = caseProcessingService.processCase(file);
             return ResponseEntity.ok(summary);
-
-        } catch (IllegalArgumentException e) {
-
-            // the magic bytes don't correspond - return HTTP 400
-            return ResponseEntity.badRequest().body(e.getMessage());
-
-        } catch (IOException e) {
-
-            // error during reading the file - return HTTP 500
-            return ResponseEntity.internalServerError().body("Error during processing file: " + e.getMessage());
-        }
     }
 }

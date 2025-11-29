@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 /**
  * An object representing a summary of a PDF case.
  */
+
 public class CaseSummary {
 
     private Long id;
